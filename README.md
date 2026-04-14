@@ -54,7 +54,6 @@ mkdir -p ~/klipper_config/scripts
 cp scripts/wled_colour.sh ~/klipper_config/scripts/
 chmod +x ~/klipper_config/scripts/wled_colour.sh
 cp config/wled.cfg ~/printer_data/config/
-cp config/print_macros.cfg ~/printer_data/config/
 ```
 
 ### 5 — Add to moonraker.conf
@@ -69,11 +68,10 @@ initial_blue: 0.71
 chain_count: 330
 ```
 
-### 6 — Add includes to printer.cfg
+### 6 — Add include to printer.cfg
 
 ```ini
 [include wled.cfg]
-[include print_macros.cfg]
 ```
 
 ### 7 — Restart
@@ -90,6 +88,68 @@ LED_PRINTING
 LED_COMPLETE
 LED_ERROR
 LED_COOLDOWN
+
+---
+
+## Adding LED Calls to Your Existing Macros
+
+If you already have a working `PRINT_START` and `PRINT_END`, **don't replace them**. Just add the LED calls at the right points instead.
+
+### PRINT_START
+
+```ini
+[gcode_macro PRINT_START]
+gcode:
+    LED_HEATING          # add before bed/nozzle heating
+
+    M190 S{BED_TEMP}     # your existing bed heat wait
+    M109 S{EXTRUDER_TEMP} # your existing nozzle heat wait
+
+    LED_MESHING          # add before Z_TILT / QGL and bed mesh
+    Z_TILT_ADJUST
+    BED_MESH_CALIBRATE
+
+    LED_HEATING          # add before final nozzle heat if you heat after meshing
+    M109 S{EXTRUDER_TEMP}
+
+    LED_PRINTING         # add just before your purge line / first move
+    M117 Printing...
+```
+
+### PRINT_END
+
+```ini
+[gcode_macro PRINT_END]
+gcode:
+    # ... your existing end moves ...
+    BED_MESH_CLEAR
+    LED_COMPLETE         # add after heaters off and park
+    G4 P8000             # hold green for 8 seconds
+    LED_COOLDOWN
+```
+
+### CANCEL_PRINT
+
+```ini
+[gcode_macro CANCEL_PRINT]
+gcode:
+    LED_ERROR            # add at the top so it flashes red immediately
+    # ... your existing cancel moves ...
+```
+
+### PAUSE / RESUME
+
+```ini
+[gcode_macro PAUSE]
+gcode:
+    # ... your existing pause moves ...
+    LED_HEATING          # amber = attention needed
+
+[gcode_macro RESUME]
+gcode:
+    LED_PRINTING         # back to white when resuming
+    # ... your existing resume moves ...
+```
 
 ---
 
@@ -115,8 +175,12 @@ Effect: `0` = solid, `1` = blink, `2` = breathe
 - GRB strips: swap R and G in your PARAMS values
 
 **Macros not found**
-- Confirm includes are in printer.cfg
+- Confirm `[include wled.cfg]` is in printer.cfg
 - Check logs: `tail -f ~/printer_data/logs/klippy.log`
+
+**gcode_shell_command not working**
+- Verify the file exists: `ls ~/klipper/klippy/extras/gcode_shell_command.py`
+- Restart Klipper after installing it
 
 ---
 
@@ -125,7 +189,7 @@ WLED_Voron--F1-Lights/
 ├── README.md
 ├── config/
 │   ├── wled.cfg           # LED macros, direct WLED API calls
-│   └── print_macros.cfg   # PRINT_START, PRINT_END, PAUSE, RESUME, CANCEL
+│   └── print_macros.cfg   # Optional - PRINT_START/END with LEDs baked in
 └── scripts/
 └── wled_colour.sh     # Shell script posting colours to WLED JSON API
 
