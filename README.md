@@ -57,11 +57,11 @@ You need a Klipper printer with Moonraker and Mainsail or Fluidd, and an ESP32 o
    cp config/wled.cfg ~/printer_data/config/
    ```
 
-4. **Point `wled.cfg` at your strip.** The address of the author's WLED controller is written into every `PARAMS=` line; replace it with yours (for example `192.0.2.50`):
+4. **Point `wled.cfg` at your strip.** Every `PARAMS=` line uses the placeholder address `192.0.2.50`; replace it with your WLED controller's IP (here `192.168.1.50`):
 
    ```bash
-   sed -i -E 's/PARAMS="[0-9.]+ /PARAMS="192.0.2.50 /' ~/printer_data/config/wled.cfg
-   grep -c 'PARAMS="192.0.2.50 ' ~/printer_data/config/wled.cfg    # expect 9
+   sed -i -E 's/PARAMS="[0-9.]+ /PARAMS="192.168.1.50 /' ~/printer_data/config/wled.cfg
+   grep -c 'PARAMS="192.168.1.50 ' ~/printer_data/config/wled.cfg    # expect 9
    ```
 
    If your user isn't `pi`, also fix the script path in `[gcode_shell_command _wled_curl]`.
