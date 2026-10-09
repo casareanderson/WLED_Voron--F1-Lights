@@ -217,3 +217,5 @@ MIT, see [LICENSE](LICENSE).
 - Original idea: [Gliptopolis/WLED_Klipper](https://github.com/Gliptopolis/WLED_Klipper)
 - WLED firmware: [Aircoookie/WLED](https://github.com/Aircoookie/WLED)
 - `gcode_shell_command.py`: from [RatOS](https://github.com/Rat-OS/RatOS), originally by Arksine (GPLv3), downloaded separately and not included here
+
+If this is useful to you, [buy me a coffee](https://buymeacoffee.com/iamc_tech) ☕
