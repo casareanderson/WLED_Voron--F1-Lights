@@ -6,6 +6,7 @@ Klipper macros that set a WLED LED strip on a Voron 2 (or any Klipper printer) t
 
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 ![Klipper + WLED](https://img.shields.io/badge/for-Klipper%20%2B%20WLED-orange.svg)
+[![Buy Me a Coffee](https://raw.githubusercontent.com/casareanderson/.github/main/badges/bmc-yellow.svg)](https://buymeacoffee.com/iamc_tech)
 
 Based on [Gliptopolis/WLED_Klipper](https://github.com/Gliptopolis/WLED_Klipper), reworked on a Voron 2.
 
