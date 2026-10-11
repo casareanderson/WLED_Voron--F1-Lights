@@ -36,6 +36,8 @@ Generated on 2026-10-08 by parsing the `LED_*` macros in `config/wled.cfg` and d
 
 ## Quick start
 
+Full step-by-step guide, tested on a fresh machine every week: [docs/SETUP.md](docs/SETUP.md).
+
 You need a Klipper printer with Moonraker and Mainsail or Fluidd, and an ESP32 or ESP8266 running [WLED](https://install.wled.me/) on your network, wired to a WS2812B, SK6812 or COB strip. COB strips aren't individually addressable, but full-strip colour and brightness work.
 
 1. **Flash WLED** from [install.wled.me](https://install.wled.me/) and note the ESP's IP address. Check the colour order at `http://<WLED-IP>/settings/leds` (most WS2812B and COB strips are GRB).
@@ -156,7 +158,7 @@ Or include `config/print_macros.cfg`, which has all five with the LED calls in p
 
 | Setting | Where | Default | What it does |
 |---|---|---|---|
-| WLED address | every `PARAMS=` line in `wled.cfg` | the author's LAN address | Where the colour is posted. Must be changed. |
+| WLED address | every `PARAMS=` line in `wled.cfg` | `192.0.2.50` (a placeholder) | Where the colour is posted. Must be changed. |
 | Script path | `[gcode_shell_command _wled_curl]` | `/home/pi/klipper_config/scripts/wled_colour.sh` | The script Klipper runs |
 | `timeout` | `[gcode_shell_command _wled_curl]` | `5` s | Klipper gives up on the script after this |
 | `--connect-timeout`, `--max-time` | `wled_colour.sh` | `3` s, `5` s | curl limits, so an unreachable strip doesn't hang a print |

@@ -1,0 +1,32 @@
+name: setup-check
+
+# Checks the config and the shell script the guide installs, against a fake WLED.
+# There is no printer in CI, so Klipper itself is not run (see docs/SETUP.md).
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "35 6 * * 1"
+  push:
+    paths:
+      - "docs/SETUP.md"
+      - "scripts/**"
+      - "config/**"
+      - ".github/workflows/setup-check.yml"
+  pull_request:
+    paths:
+      - "docs/SETUP.md"
+      - "scripts/**"
+      - "config/**"
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: bash scripts/setup-check.sh
