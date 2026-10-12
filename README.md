@@ -2,20 +2,29 @@
 
 Klipper macros that set a WLED LED strip on a Voron 2 (or any Klipper printer) to an F1-themed colour for each print state: idle, heating, meshing, printing, complete, error and cooldown.
 
-![The eight LED_* macros from config/wled.cfg rendered as colour swatches: the RGB values each one sends to WLED, its brightness and effect, and the colour a strip with red and green swapped (GRB) shows](docs/colours.png)
+![The eight LED macros from config/wled.cfg rendered as colour swatches: the RGB values each one sends to WLED, its brightness and effect, and the colour a strip with red and green swapped (GRB) shows](docs/colours.png)
 
-[![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Klipper + WLED](https://img.shields.io/badge/for-Klipper%20%2B%20WLED-orange.svg)
-[![Buy Me a Coffee](https://raw.githubusercontent.com/casareanderson/.github/main/badges/bmc-yellow.svg)](https://buymeacoffee.com/iamc_tech)
 
-Based on [Gliptopolis/WLED_Klipper](https://github.com/Gliptopolis/WLED_Klipper), reworked on a Voron 2.
+## Contents
+
+- [What it does](#what-it-does)
+- [Screenshots](#screenshots)
+- [Quick start](#quick-start)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [How it works](#how-it-works)
+- [Status, limits and real results](#status-limits-and-real-results)
+- [Troubleshooting](#troubleshooting)
+- [Licence and credits](#licence-and-credits)
 
 ## What it does
 
 - Adds `LED_IDLE`, `LED_HEATING`, `LED_MESHING`, `LED_PRINTING`, `LED_COMPLETE`, `LED_ERROR`, `LED_COOLDOWN` and `LED_OFF` macros to Klipper.
-- Each macro posts one JSON request straight to WLED's `/json/state` API (colour, brightness, effect) through a small shell script, so the change is immediate and doesn't depend on Moonraker's WLED presets.
-- Uses three WLED effects: solid, blink (complete and error) and breathe (cooldown).
-- Clears a frozen WLED segment on every call (`"frz": false`), so a segment left frozen from the WLED UI doesn't swallow the colour.
+- Each macro posts one JSON request straight to WLED's `/json/state` API (colour, brightness, effect) through `wled_colour.sh`, so the change is immediate and independent of Moonraker's WLED presets.
+- Uses three WLED effects: solid (0), blink (1, for complete and error) and breathe (2, for cooldown).
+- Clears a frozen WLED segment on every call (`"frz": false`), so a segment left frozen from the WLED UI does not swallow the colour.
 - Ships an optional `print_macros.cfg` with `PRINT_START`, `PRINT_END`, `CANCEL_PRINT`, `PAUSE` and `RESUME` that already call the LED macros.
 
 ## Screenshots
@@ -39,10 +48,10 @@ Generated on 2026-10-08 by parsing the `LED_*` macros in `config/wled.cfg` and d
 
 Full step-by-step guide, tested on a fresh machine every week: [docs/SETUP.md](docs/SETUP.md).
 
-You need a Klipper printer with Moonraker and Mainsail or Fluidd, and an ESP32 or ESP8266 running [WLED](https://install.wled.me/) on your network, wired to a WS2812B, SK6812 or COB strip. COB strips aren't individually addressable, but full-strip colour and brightness work.
+You need a Klipper printer with Moonraker and Mainsail or Fluidd, and an ESP32 or ESP8266 running [WLED](https://install.wled.me/) on your network, wired to a WS2812B, SK6812 or COB strip. COB strips are not individually addressable, but full-strip colour and brightness work.
 
 1. **Flash WLED** from [install.wled.me](https://install.wled.me/) and note the ESP's IP address. Check the colour order at `http://<WLED-IP>/settings/leds` (most WS2812B and COB strips are GRB).
-2. **Install `gcode_shell_command`** (Klipper doesn't ship it):
+2. **Install `gcode_shell_command`** (Klipper does not ship it):
 
    ```bash
    wget -O ~/klipper/klippy/extras/gcode_shell_command.py \
@@ -60,20 +69,20 @@ You need a Klipper printer with Moonraker and Mainsail or Fluidd, and an ESP32 o
    cp config/wled.cfg ~/printer_data/config/
    ```
 
-4. **Point `wled.cfg` at your strip.** Every `PARAMS=` line uses the placeholder address `192.0.2.50`; replace it with your WLED controller's IP (here `192.168.1.50`):
+4. **Point `wled.cfg` at your strip.** Every `PARAMS=` line uses the placeholder address `192.0.2.50`; replace it with your WLED controller's IP (here `198.51.100.50`):
 
    ```bash
-   sed -i -E 's/PARAMS="[0-9.]+ /PARAMS="192.168.1.50 /' ~/printer_data/config/wled.cfg
-   grep -c 'PARAMS="192.168.1.50 ' ~/printer_data/config/wled.cfg    # expect 9
+   sed -i -E 's/PARAMS="[0-9.]+ /PARAMS="198.51.100.50 /' ~/printer_data/config/wled.cfg
+   grep -c 'PARAMS="198.51.100.50 ' ~/printer_data/config/wled.cfg    # expect 9
    ```
 
-   If your user isn't `pi`, also fix the script path in `[gcode_shell_command _wled_curl]`.
+   If your user is not `pi`, also fix the script path in `[gcode_shell_command _wled_curl]`.
 5. **Add the WLED strip to `moonraker.conf`** (used by `_WLED_POST`, and gives you the strip in the Mainsail UI):
 
    ```ini
    [wled klipper]
    type: http
-   address: 192.0.2.50
+   address: 198.51.100.50
    initial_red: 0.0
    initial_green: 0.0
    initial_blue: 0.71
@@ -104,7 +113,7 @@ You need a Klipper printer with Moonraker and Mainsail or Fluidd, and an ESP32 o
 
 ## Usage
 
-If you already have a working `PRINT_START` and `PRINT_END`, **don't replace them**. Add the LED calls at the right points:
+If you already have a working `PRINT_START` and `PRINT_END`, do not replace them. Add the LED calls at the right points:
 
 ```ini
 [gcode_macro PRINT_START]
@@ -155,14 +164,14 @@ Or include `config/print_macros.cfg`, which has all five with the LED calls in p
 <WLED-IP>  R  G  B  BRIGHTNESS  EFFECT
 ```
 
-`BRIGHTNESS` is 0–255. `EFFECT` is a WLED effect id: `0` solid, `1` blink, `2` breathe. Change the numbers in `wled.cfg` to change a colour.
+`BRIGHTNESS` is 0\u2013255. `EFFECT` is a WLED effect id: `0` solid, `1` blink, `2` breathe. Change the numbers in `wled.cfg` to change a colour.
 
 | Setting | Where | Default | What it does |
 |---|---|---|---|
 | WLED address | every `PARAMS=` line in `wled.cfg` | `192.0.2.50` (a placeholder) | Where the colour is posted. Must be changed. |
 | Script path | `[gcode_shell_command _wled_curl]` | `/home/pi/klipper_config/scripts/wled_colour.sh` | The script Klipper runs |
 | `timeout` | `[gcode_shell_command _wled_curl]` | `5` s | Klipper gives up on the script after this |
-| `--connect-timeout`, `--max-time` | `wled_colour.sh` | `3` s, `5` s | curl limits, so an unreachable strip doesn't hang a print |
+| `--connect-timeout`, `--max-time` | `wled_colour.sh` | `3` s, `5` s | curl limits, so an unreachable strip does not hang a print |
 | `[wled klipper]` | `moonraker.conf` | 330 LEDs, initial blue 0.71 | Moonraker's own handle on the strip |
 | `R`, `G`, `B`, `BRI`, `FX` | `_WLED_POST` parameters | 0, 0, 0, 255, 0 | Optional generic macro: sets Moonraker's strip on at `BRI`, then posts the colour |
 
@@ -204,7 +213,7 @@ WLED_Voron--F1-Lights/
 - **`LED_MESHING` is not pre-swapped.** It sends `0 120 255`, which shows as electric blue on a strip with the right colour order, but as violet (`120 0 255`) on a swapped one, as the swatch shows. Send `120 0 255` if your strip swaps and you want blue.
 - The WLED IP address is hard-coded in nine places in `wled.cfg`; there is no single variable for it.
 - Only WLED segment 0 is set.
-- `LED_*` macros don't go through Moonraker, so Moonraker's view of the strip can be out of date after one runs.
+- `LED_*` macros do not go through Moonraker, so Moonraker's view of the strip can be out of date after one runs.
 
 ### Troubleshooting
 
@@ -220,5 +229,3 @@ MIT, see [LICENSE](LICENSE).
 - Original idea: [Gliptopolis/WLED_Klipper](https://github.com/Gliptopolis/WLED_Klipper)
 - WLED firmware: [Aircoookie/WLED](https://github.com/Aircoookie/WLED)
 - `gcode_shell_command.py`: from [RatOS](https://github.com/Rat-OS/RatOS), originally by Arksine (GPLv3), downloaded separately and not included here
-
-If this is useful to you, [buy me a coffee](https://buymeacoffee.com/iamc_tech) ☕
